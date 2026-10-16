@@ -12,8 +12,8 @@ mkdir -p output data/pcap
 echo "=== libdpdk (container): $(pkg-config --modversion libdpdk 2>/dev/null || echo unknown) ==="
 pkg-config --modversion libdpdk > output/dpdk_version.txt 2>/dev/null || echo unknown > output/dpdk_version.txt
 
-echo "=== ctest ==="
-ctest --test-dir build --output-on-failure
+echo "=== unit tests (no ctest in slim runtime; binaries run directly) ==="
+./build/test_chain && ./build/test_lifecycle && ./build/test_header && ./build/test_zerocopy
 
 echo "=== bench_upf (microbench) ==="
 rm -f bench/results.csv
