@@ -1,8 +1,10 @@
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
 #include <time.h>
+#include <sched.h>
 #include <x86intrin.h>
 
 #include "mbuf_model.h"
@@ -11,6 +13,15 @@
 #include "zerocopy.h"
 
 #define STREAM_RING_SIZE 65536
+
+static void pin_to_cpu(int cpu)
+{
+    cpu_set_t set;
+    CPU_ZERO(&set);
+    CPU_SET(cpu, &set);
+    if (sched_setaffinity(0, sizeof(set), &set) != 0)
+        perror("sched_setaffinity (continuing without pinning)");
+}
 
 static inline uint64_t rdtscp_begin(unsigned *aux)
 {
@@ -191,6 +202,7 @@ static void usage(const char *prog)
 
 int main(int argc, char **argv)
 {
+    pin_to_cpu(3);
     const char *mode = "hot";
     int iters = 0; /* 0 = default per mode */
     int payload_len = 800;
