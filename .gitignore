@@ -3,6 +3,10 @@ build/
 output/
 *.o
 __pycache__/
+docs/
+report/
+slides/
+slide/
 # Benchmark outputs are ignored by default, except the curated
 # deliverables which are force-added for review reproducibility.
 *.csv
@@ -10,7 +14,6 @@ __pycache__/
 !bench/results.csv
 !bench/compare.png
 !bench/results_pcap.csv
-!docs/img/*.png
 # PCAPs: only the small self-contained sample is tracked; capture
 # outputs and host big files are regenerable/local-only.
 *.pcap

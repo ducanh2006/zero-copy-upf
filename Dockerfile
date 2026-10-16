@@ -13,8 +13,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY . /app
-# pkg-config finds distro libdpdk; no PKG_CONFIG_PATH needed.
-RUN cmake -B build -DCMAKE_BUILD_TYPE=Release -DUSE_DPDK=ON \
+# pkg-config finds distro libdpdk; record version for runtime export.
+RUN pkg-config --modversion libdpdk > /app/dpdk_version.txt \
+    && cmake -B build -DCMAKE_BUILD_TYPE=Release -DUSE_DPDK=ON \
     && cmake --build build \
     && rm -rf build/CMakeFiles build/*.cmake build/Makefile build/cmake_install.cmake
 

@@ -1,3 +1,5 @@
 mode,received,tx_confirmed,seconds,mpps,avg_cycles_per_tx,dpdk_version
 perf,100000,200000,0.046,4.341,530.8,DPDK 24.11.0
 capture,224,448,0.003,0.138,16658.4,DPDK 24.11.0
+capture,224,448,0.004,0.127,18208.5,DPDK 24.11.0
+perf,100000,200000,0.014,14.633,157.5,DPDK 24.11.0
