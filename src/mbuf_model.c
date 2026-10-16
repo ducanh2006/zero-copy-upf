@@ -183,8 +183,12 @@ void mbuf_free(Mbuf *m)
         if (rc == 0) {
             /* Stale double-free: segment already reclaimed. Do NOT push
              * the index into the ring a second time (that would create
-             * two aliased mbufs for the same buffer). Stop the walk. */
-            break;
+             * two aliased mbufs for the same buffer). Skip it but keep
+             * walking the tail so a stale segment in the middle of a
+             * chain does not leak the rest (reuse-after-free + re-chain
+             * or concurrent free). */
+            cur = nxt;
+            continue;
         }
         if (rc > 1) {
             /* Shared segment (e.g. payload with refcnt 3): just drop one
@@ -203,8 +207,15 @@ void mbuf_free(Mbuf *m)
             ring = g_rings[pid];
         }
         if (mp != NULL && ring != NULL) {
-            size_t idx = (size_t)(cur - mp->storage);
-            if (idx < mp->capacity) {
+            /* Bounds-check BEFORE pointer subtraction: subtracting
+             * pointers from different arrays (e.g. mbuf from a destroyed
+             * pool freed after recreate with same pool_id) is UB even
+             * if the numeric idx would later fail the range check. */
+            if (cur < mp->storage || cur >= mp->storage + mp->capacity) {
+                /* Unknown pool: just clear linkage to avoid dangling chain. */
+                atomic_store_explicit(&cur->refcnt, 0, memory_order_relaxed);
+            } else {
+                size_t idx = (size_t)(cur - mp->storage);
                 /* release pairs with the acquire load of tail in
                  * mbuf_alloc(): publishes the ring[] write below. */
                 uint32_t pos = atomic_fetch_add_explicit(&mp->tail, 1, memory_order_release);
