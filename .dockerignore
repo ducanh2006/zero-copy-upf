@@ -1,0 +1,11 @@
+# Keep the build context small. NOTE: bare "*.ext" matches root level
+# only (Go filepath.Match), so use "**/" for nested files.
+third_party/
+build/
+.worktrees/
+output/
+data/pcap/out_*.pcap
+data/pcap/input_big.pcap
+**/*.o
+**/*.csv
+**/*.png

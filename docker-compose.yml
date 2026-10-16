@@ -1,0 +1,13 @@
+# 1-click services: bench (microbench) and capture (pcap replay evidence).
+# Usage: docker compose up --build capture   |   docker compose up --build bench
+services:
+  capture:
+    build: .
+    volumes:
+      - ./output:/app/output
+    command: ["capture", "--packets", "200"]
+  bench:
+    build: .
+    volumes:
+      - ./output:/app/output
+    command: ["perf", "--packets", "100000"]

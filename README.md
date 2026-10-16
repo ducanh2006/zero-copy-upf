@@ -36,6 +36,37 @@ bash bench/run_perf.sh       # + perf stat PMU when available
 bash demo/run_demo.sh        # 1-click live demo
 ```
 
+## PCAP replay (real DPDK pipeline, `infinite_rx=1`)
+
+```bash
+python3 scripts/gen_sample_pcap.py --packets 256   # in-repo sample (no host deps)
+bash scripts/run_pcap_dpdk.sh capture --packets 200   # TX -> data/pcap/out_path*.pcap
+bash scripts/run_pcap_dpdk.sh perf --packets 100000   # TX -> net_null, Mpps only
+cat bench/results_pcap.csv                            # separate schema from results.csv
+tcpdump -nn -r data/pcap/out_path1_gnb1.pcap -c 1     # outer IP/UDP-2152/GTP-U
+```
+
+Measured (`bench/results_pcap.csv`, DPDK 24.11.0, `--no-huge` laptop):
+
+| Mode | received | tx (both paths) | Mpps | avg cyc/tx |
+|---|---|---|---|---|
+| capture | 224 | 448 | 0.138 | 16658.4 |
+| perf | 100000 | 200000 | 4.341 | 530.8 |
+
+Notes: `received` may overshoot `--packets` by <1 burst (stop check is per-loop).
+`UPF_RX_PCAP` env overrides the sizing source; 1M-packet files need ~1M+ mbufs
+(~2GB hugepages) — laptop default is the 256-packet sample.
+
+## Docker (1-click, distro DPDK)
+
+```bash
+bash scripts/run_docker.sh capture   # or: docker compose up --build bench
+```
+
+The image uses Ubuntu 24.04 `libdpdk-dev` (version recorded in
+`output/dpdk_version.txt`; differs from third_party 24.11 — chained-mbuf
+APIs used are stable across both).
+
 ## DPDK ON/OFF
 
 ```bash

@@ -88,3 +88,15 @@ skyt_add_test(test_chain tests/test_chain.c)
 skyt_add_test(test_lifecycle tests/test_lifecycle.c)
 skyt_add_test(test_header tests/test_header.c)
 skyt_add_test(test_zerocopy tests/test_zerocopy.c)
+
+# ---- dpdk_pcap_upf (real PCAP replay app, DPDK-only) ----
+if(USE_DPDK AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/src/dpdk-real/dpdk_pcap_upf.c")
+  add_executable(dpdk_pcap_upf
+    src/dpdk-real/dpdk_pcap_upf.c
+    src/dpdk-real/dpdk_init.c)
+  target_include_directories(dpdk_pcap_upf PRIVATE
+    src src/dpdk-real ${DPDK_INCLUDE_DIRS})
+  target_compile_options(dpdk_pcap_upf PRIVATE ${DPDK_CFLAGS_OTHER})
+  target_link_libraries(dpdk_pcap_upf PRIVATE
+    mbuf Threads::Threads ${DPDK_LDFLAGS})
+endif()

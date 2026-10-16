@@ -1,5 +1,6 @@
 build/
 .worktrees/
+output/
 *.o
 __pycache__/
 # Benchmark outputs are ignored by default, except the curated
@@ -8,5 +9,10 @@ __pycache__/
 *.png
 !bench/results.csv
 !bench/compare.png
+!bench/results_pcap.csv
 !docs/img/*.png
+# PCAPs: only the small self-contained sample is tracked; capture
+# outputs and host big files are regenerable/local-only.
+*.pcap
+!data/pcap/sample_5g_traffic.pcap
 third_party/*
