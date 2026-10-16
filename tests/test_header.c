@@ -146,10 +146,15 @@ int main(void)
         return 1;
     }
     /* Original payload must be untouched by the mutate. */
+    /* d1[50] was flipped, so it must now differ from the original. */
     if (pdata[0] == d1[50]) {
-        /* pdata[0] was original value; d1[50] was flipped, so they must differ. */
-    } else {
-        /* expected: differ */
+        fprintf(stderr, "deepcopy alias original payload (pdata[0]==d1[50] after mutate)\n");
+        return 1;
+    }
+    /* The untouched copy (d2) must still match the original payload. */
+    if (memcmp(pdata, d2 + 50, 800) != 0) {
+        fprintf(stderr, "original payload corrupted or d2 mismatch\n");
+        return 1;
     }
 
     mbuf_free(o1);

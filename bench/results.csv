@@ -1,0 +1,5 @@
+mode,method,iters,avg_cycles,avg_ns,mpps,p50_cycles,p95_cycles,p99_cycles,bytes_copied
+hot,deepcopy,100000,1139.9,623.2,1.605,618,4792,5980,1700
+hot,zerocopy,100000,411.0,268.2,3.728,318,400,2782,100
+stream,deepcopy,100000,767.6,413.7,2.417,746,1014,1190,1700
+stream,zerocopy,100000,585.8,388.8,2.572,322,2504,2922,100

@@ -7,10 +7,14 @@ Measured (100000 iters, 800B payload, `bench/results.csv`):
 
 | Mode | Method | avg_cycles | avg_ns | Mpps | p50 | bytes |
 |---|---|---|---|---|---|---|
-| hot | deepcopy | 784.5 | 423.5 | 2.361 | 664 | 1700 |
-| hot | zerocopy | 429.6 | 279.9 | 3.573 | 328 | 100 |
-| stream | deepcopy | 788.6 | 423.5 | 2.361 | 768 | 1700 |
-| stream | zerocopy | 433.8 | 281.5 | 3.552 | 336 | 100 |
+| hot | deepcopy | 1139.9 | 623.2 | 1.605 | 618 | 1700 |
+| hot | zerocopy | 411.0 | 268.2 | 3.728 | 318 | 100 |
+| stream | deepcopy | 767.6 | 413.7 | 2.417 | 746 | 1700 |
+| stream | zerocopy | 585.8 | 388.8 | 2.572 | 322 | 100 |
+
+> Note: `__rdtscp` varies with freq-scaling/load; p50 is the robust claim
+> (hot 618→318 ≈1.94x, stream 746→322 ≈2.32x). Re-run on the demo machine
+> before presenting; numbers above are verbatim from the committed CSV.
 
 ## Build
 
@@ -23,6 +27,7 @@ ctest --test-dir build --output-on-failure
 ## Bench
 
 ```bash
+rm -f bench/results.csv   # bench.c appends; always reset before a canonical run
 ./build/bench_upf --mode hot --iters 100000 --payload 800
 ./build/bench_upf --mode stream --iters 100000 --payload 800
 cat bench/results.csv

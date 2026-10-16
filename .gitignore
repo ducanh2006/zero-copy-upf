@@ -1,7 +1,12 @@
 build/
 .worktrees/
 *.o
+__pycache__/
+# Benchmark outputs are ignored by default, except the curated
+# deliverables which are force-added for review reproducibility.
 *.csv
 *.png
-__pycache__/
+!bench/results.csv
+!bench/compare.png
+!docs/img/*.png
 third_party/*

@@ -23,6 +23,11 @@ Mempool *mempool_create(uint32_t capacity, uint16_t pool_id)
 {
     if (capacity == 0 || pool_id >= MBUF_MAX_POOLS)
         return NULL;
+    /* Reject duplicate pool_id: overwriting g_pools[pool_id] would make
+     * mbuf_free() return old-pool segments into the new pool. Caller must
+     * mempool_destroy() the old pool first. */
+    if (g_pools[pool_id] != NULL)
+        return NULL;
 
     Mempool *mp = (Mempool *)malloc(sizeof(Mempool));
     if (!mp)
@@ -64,10 +69,7 @@ Mempool *mempool_create(uint32_t capacity, uint16_t pool_id)
     atomic_init(&mp->head, 0);
     atomic_init(&mp->tail, capacity); /* queue pre-filled with `capacity` free indices */
 
-    /* Replace any stale registration for this pool_id (caller should have destroyed). */
-    if (g_pools[pool_id] != NULL && g_pools[pool_id] != mp) {
-        free(g_rings[pool_id]);
-    }
+    /* pool_id slot is guaranteed free (checked above). */
     g_pools[pool_id] = mp;
     g_rings[pool_id] = ring;
     return mp;
@@ -178,13 +180,20 @@ void mbuf_free(Mbuf *m)
     while (cur != NULL) {
         Mbuf *nxt = cur->next;
         uint16_t rc = atomic_load_explicit(&cur->refcnt, memory_order_acquire);
+        if (rc == 0) {
+            /* Stale double-free: segment already reclaimed. Do NOT push
+             * the index into the ring a second time (that would create
+             * two aliased mbufs for the same buffer). Stop the walk. */
+            break;
+        }
         if (rc > 1) {
             /* Shared segment (e.g. payload with refcnt 3): just drop one
              * reference and stop; do NOT reclaim, do NOT walk further. */
             atomic_fetch_sub_explicit(&cur->refcnt, (uint16_t)1, memory_order_acq_rel);
             break;
         }
-        /* rc == 1 (exclusive) or 0 (stale): reclaim this segment to its pool. */
+        /* rc == 1 (exclusive): reclaim this segment to its pool.
+         * Note: rc == 0 is handled above (double-free guard). */
         cur->next = NULL;
         int pid = (int)cur->pool_id;
         Mempool *mp = NULL;
@@ -196,7 +205,9 @@ void mbuf_free(Mbuf *m)
         if (mp != NULL && ring != NULL) {
             size_t idx = (size_t)(cur - mp->storage);
             if (idx < mp->capacity) {
-                uint32_t pos = atomic_fetch_add_explicit(&mp->tail, 1, memory_order_relaxed);
+                /* release pairs with the acquire load of tail in
+                 * mbuf_alloc(): publishes the ring[] write below. */
+                uint32_t pos = atomic_fetch_add_explicit(&mp->tail, 1, memory_order_release);
                 ring[pos % mp->capacity] = (uint32_t)idx;
             }
             cur->data_len = 0;

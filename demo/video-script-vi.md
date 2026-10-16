@@ -22,10 +22,10 @@ Tổng thời lượng: ~2:30. Quay terminal thực chạy `demo/run_demo.sh` + 
 ## 1:00–2:00 — Benchmark thực
 > "Bộ đo dùng rdtscp cộng mfence và clock monotonic, ghim CPU3, hai chế độ hot L1 và
 > stream 65536 gói khoảng 55 megabyte vượt L3 30 megabyte. Kết quả thực đo một trăm
-> nghìn vòng, payload tám trăm byte: hot deepcopy 784.5 cycles, 423.5 ns, 2.361 Mpps
-> so với zerocopy 429.6 cycles, 279.9 ns, 3.573 Mpps; stream deepcopy 788.6 cycles,
-> 423.5 ns, 2.361 Mpps so với zerocopy 433.8 cycles, 281.5 ns, 3.552 Mpps. Tốc độ
-> tăng 1.83 lần hot và 1.82 lần stream, lượng copy giảm từ 1700 xuống 100 byte."
+> nghìn vòng, payload tám trăm byte: hot deepcopy 1139.9 cycles, 623.2 ns, 1.605 Mpps
+> so với zerocopy 411.0 cycles, 268.2 ns, 3.728 Mpps; stream deepcopy 767.6 cycles,
+> 413.7 ns, 2.417 Mpps so với zerocopy 585.8 cycles, 388.8 ns, 2.572 Mpps. Tốc độ
+> tăng 2.77 lần hot và 1.31 lần stream, lượng copy giảm từ 1700 xuống 100 byte."
 
 (Chạy: `./build/bench_upf --mode hot/stream`, `cat bench/results.csv`.)
 

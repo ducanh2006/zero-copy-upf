@@ -46,10 +46,10 @@ refcnt 1, TEID ...01      refcnt 1, TEID ...02
 
 | Mode | Method | avg_cycles | avg_ns | Mpps | p50 | bytes |
 |---|---|---|---|---|---|---|
-| hot | deepcopy | 784.5 | 423.5 | 2.361 | 664 | 1700 |
-| hot | zerocopy | 429.6 | 279.9 | 3.573 | 328 | 100 |
-| stream | deepcopy | 788.6 | 423.5 | 2.361 | 768 | 1700 |
-| stream | zerocopy | 433.8 | 281.5 | 3.552 | 336 | 100 |
+| hot | deepcopy | 1139.9 | 623.2 | 1.605 | 618 | 1700 |
+| hot | zerocopy | 411.0 | 268.2 | 3.728 | 318 | 100 |
+| stream | deepcopy | 767.6 | 413.7 | 2.417 | 746 | 1700 |
+| stream | zerocopy | 585.8 | 388.8 | 2.572 | 322 | 100 |
 
-- Speedup **1.83x hot / 1.82x stream** (cycles); stream chứng minh miễn nhiễm thrashing (55MB > L3 30MB)
+- Speedup **2.77x hot / 1.31x stream** (cycles; p50 1.94x/2.32x robust); stream chứng minh miễn nhiễm thrashing (55MB > L3 30MB)
 - Tiếp theo: thử NIC vật lý VHT + `MULTI_SEGS` + `perf` PMU, microsecond URLLC ổn định

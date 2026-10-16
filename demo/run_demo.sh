@@ -18,8 +18,8 @@ cecho "(only 50B header copies, never payload)" "$YELLOW"
 
 cecho "=== [4/4] Benchmark hot + stream (rdtscp, pinned CPU3) ===" "$CYAN"
 rm -f bench/results.csv
-./build/bench_upf --mode hot --iters 50000 --payload 800
-./build/bench_upf --mode stream --iters 50000 --payload 800
+./build/bench_upf --mode hot --iters 100000 --payload 800
+./build/bench_upf --mode stream --iters 100000 --payload 800
 
 cecho "=== results.csv ===" "$GREEN"
 cat bench/results.csv

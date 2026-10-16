@@ -40,10 +40,10 @@ wall `CLOCK_MONOTONIC_RAW` total, p50/p95/p99 via `qsort`. Hot = 1 payload reuse
 `mode,method,iters,avg_cycles,avg_ns,mpps,p50,p95,p99,bytes_copied`.
 Current live numbers (100000 iters):
 
-- hot deepcopy 784.5cyc/423.5ns/2.361Mpps/p50 664/1700B
-- hot zerocopy 429.6cyc/279.9ns/3.573Mpps/p50 328/100B
-- stream deepcopy 788.6cyc/423.5ns/2.361Mpps/p50 768/1700B
-- stream zerocopy 433.8cyc/281.5ns/3.552Mpps/p50 336/100B
+- hot deepcopy 1139.9cyc/623.2ns/1.605Mpps/p50 618/1700B
+- hot zerocopy 411.0cyc/268.2ns/3.728Mpps/p50 318/100B
+- stream deepcopy 767.6cyc/413.7ns/2.417Mpps/p50 746/1700B
+- stream zerocopy 585.8cyc/388.8ns/2.572Mpps/p50 322/100B
 
 ## DPDK mapping
 

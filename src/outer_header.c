@@ -28,14 +28,8 @@ void build_outer_header_struct(int path_id, OuterHeader *hdr)
     static const uint8_t smac[6] = { 0x02, 0x00, 0x00, 0x00, 0x00, 0x02 };
     memcpy(hdr->dst_mac, dmac, 6);
     memcpy(hdr->src_mac, smac, 6);
-    /* ethertype 0x0800 stored BE */
-    hdr->ethertype = (uint16_t)0x0008; /* bytes on wire: 08 00 */
-    /* Ensure wire order regardless of host endianness: write manually. */
-    {
-        uint8_t *e = (uint8_t *)&hdr->ethertype;
-        e[0] = 0x08;
-        e[1] = 0x00;
-    }
+    /* ethertype 0x0800 in wire (big-endian) order */
+    put_be16((uint8_t *)&hdr->ethertype, (uint16_t)0x0800);
 
     /* IPv4 */
     hdr->ver_ihl = 0x45;

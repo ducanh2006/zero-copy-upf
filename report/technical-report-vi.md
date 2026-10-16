@@ -13,8 +13,8 @@ Redundant Transmission cho URLLC trên N3/N9 yêu cầu nhân bản mỗi gói p
 thành 2 luồng với Outer Header khác nhau. Deep-copy truyền thống sao chép 1700B
 (2×50B header + 2×800B payload), gây cache-thrashing và tốn chu kỳ CPU. Giải pháp
 chained-mbuf chỉ sao chép 100B header (2×50B), payload 0B copy nhờ `next` + `refcnt`
-và NIC Scatter-Gather. Đo thực trên i7-13700HX cho thấy speedup 1.83x (hot) và
-1.82x (stream) về cycles, throughput tăng từ 2.361 Mpps lên 3.573 Mpps (hot).
+và NIC Scatter-Gather. Đo thực trên i7-13700HX cho thấy speedup 2.77x (hot) và
+1.31x (stream) về cycles, throughput tăng từ 1.605 Mpps lên 3.728 Mpps (hot).
 
 ## 2. Đặt vấn đề
 
@@ -79,6 +79,7 @@ Lệnh tái hiện:
 
 ```bash
 cmake -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build --clean-first
+rm -f bench/results.csv
 ./build/bench_upf --mode hot --iters 100000 --payload 800
 ./build/bench_upf --mode stream --iters 100000 --payload 800
 cat bench/results.csv
@@ -89,22 +90,23 @@ CSV nguyên văn:
 
 ```
 mode,method,iters,avg_cycles,avg_ns,mpps,p50_cycles,p95_cycles,p99_cycles,bytes_copied
-hot,deepcopy,100000,784.5,423.5,2.361,664,1000,3264,1700
-hot,zerocopy,100000,429.6,279.9,3.573,328,422,2888,100
-stream,deepcopy,100000,788.6,423.5,2.361,768,1048,1226,1700
-stream,zerocopy,100000,433.8,281.5,3.552,336,422,2938,100
+hot,deepcopy,100000,1139.9,623.2,1.605,618,4792,5980,1700
+hot,zerocopy,100000,411.0,268.2,3.728,318,400,2782,100
+stream,deepcopy,100000,767.6,413.7,2.417,746,1014,1190,1700
+stream,zerocopy,100000,585.8,388.8,2.572,322,2504,2922,100
 ```
 
 | Mode | Method | iters | avg_cycles | avg_ns | Mpps | p50 | p95 | p99 | bytes |
 |---|---|---|---|---|---|---|---|---|---|
-| hot | deepcopy | 100000 | 784.5 | 423.5 | 2.361 | 664 | 1000 | 3264 | 1700 |
-| hot | zerocopy | 100000 | 429.6 | 279.9 | 3.573 | 328 | 422 | 2888 | 100 |
-| stream | deepcopy | 100000 | 788.6 | 423.5 | 2.361 | 768 | 1048 | 1226 | 1700 |
-| stream | zerocopy | 100000 | 433.8 | 281.5 | 3.552 | 336 | 422 | 2938 | 100 |
+| hot | deepcopy | 100000 | 1139.9 | 623.2 | 1.605 | 618 | 4792 | 5980 | 1700 |
+| hot | zerocopy | 100000 | 411.0 | 268.2 | 3.728 | 318 | 400 | 2782 | 100 |
+| stream | deepcopy | 100000 | 767.6 | 413.7 | 2.417 | 746 | 1014 | 1190 | 1700 |
+| stream | zerocopy | 100000 | 585.8 | 388.8 | 2.572 | 322 | 2504 | 2922 | 100 |
 
-- Hot (L1): zerocopy nhanh hơn **1.83x cycles** (784.5→429.6), **1.51x ns** (423.5→279.9), Mpps 2.361→3.573.
-- Stream (55MB > L3 30MB, 65536 gói): zerocopy nhanh hơn **1.82x cycles** (788.6→433.8), **1.50x ns** (423.5→281.5), Mpps 2.361→3.552; p50 768→336 cho thấy miễn nhiễm cache-thrashing (chỉ chạm 100B L1).
+- Hot (L1): zerocopy nhanh hơn **2.77x cycles** (1139.9→411.0), **2.32x ns** (623.2→268.2), Mpps 1.605→3.728.
+- Stream (55MB > L3 30MB, 65536 gói): zerocopy nhanh hơn **1.31x cycles** (767.6→585.8), **1.06x ns** (413.7→388.8), Mpps 2.417→2.572; p50 746→322 cho thấy miễn nhiễm cache-thrashing (chỉ chạm 100B L1).
 - Lượng copy: 1700B → 100B (giảm 94%), payload 800B → 0B.
+- Lưu ý phương sai: `__rdtscp` dao động theo freq-scaling/tải máy (xem p95/p99); p50 là chỉ số robust (hot 618→318 ≈1.94x, stream 746→322 ≈2.32x). Luôn `rm -f bench/results.csv` trước khi đo lại vì `bench.c` append.
 
 ## 6. Triển khai DPDK thật
 
