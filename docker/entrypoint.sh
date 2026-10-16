@@ -9,8 +9,10 @@ shift || true
 cd /app
 mkdir -p output data/pcap
 
-echo "=== libdpdk (container): $(pkg-config --modversion libdpdk 2>/dev/null || echo unknown) ==="
-pkg-config --modversion libdpdk > output/dpdk_version.txt 2>/dev/null || echo unknown > output/dpdk_version.txt
+if [ -f /app/dpdk_version.txt ]; then
+  cp -f /app/dpdk_version.txt output/
+fi
+echo "=== libdpdk (container): $(cat output/dpdk_version.txt 2>/dev/null || echo unknown) ==="
 
 echo "=== unit tests (no ctest in slim runtime; binaries run directly) ==="
 ./build/test_chain && ./build/test_lifecycle && ./build/test_header && ./build/test_zerocopy
